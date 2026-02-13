@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¿Quieres ser mi Valentín? 💕</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .container {
+            text-align: center;
+            background: white;
+            padding: 60px 40px;
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            position: relative;
+        }
+
+        h1 {
+            color: #e91e63;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .question {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 40px;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            align-items: center;
+            min-height: 200px;
+            position: relative;
+            padding: 20px;
+        }
+
+        button {
+            border: none;
+            border-radius: 50px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        #yesBtn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 40px;
+        }
+
+        #noBtn {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 20px 40px;
+        }
+        
+        #noBtn.moving {
+            position: absolute;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .success-container {
+            text-align: center;
+        }
+
+        .success-container h2 {
+            color: #e91e63;
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        .success-container img {
+            max-width: 100%;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+
+        .sad-container {
+            text-align: center;
+        }
+
+        .sad-container h2 {
+            color: #666;
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        .sad-container img {
+            max-width: 100%;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="confetti"></canvas>
+    
+    <div class="container">
+        <div id="questionContainer">
+            <h1>💝 Valentine's Day 💝</h1>
+            <p class="question">¿Serás mi cita de San Valentín?</p>
+            <div class="button-container">
+                <button id="yesBtn">Si! 💕</button>
+                <button id="noBtn">No</button>
+            </div>
+        </div>
+
+        <div id="successContainer" class="success-container hidden">
+            <h2>Te amo mi nina linda! 🎉💕</h2>
+            <img src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExaG1hY2dmODB1azh5ZHhqemptb3k5eHJubzNrcTI2djdlYWJqYWJxeCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/EkPicGgIeyNAQ/giphy.gif" alt="Dame un Kiss baby">
+        </div>
+
+        <div id="sadContainer" class="sad-container hidden">
+            <h2>No lo se, y porque no?? ojo ojo!!!</h2>
+            <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExcWc5Z3A4YmV6OW5kbThzeWVxemZ5bTY5aGowbm82OXhvcjY3MXk5MyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/nN1EcdaJgv7liAvgx9/giphy.gif" alt="Aqui no hay no eres mia por las buenas o malas">
+        </div>
+    </div>
+
+    <script>
+        let noClickCount = 0;
+        let yesSize = 1;
+        let noSize = 1;
+        
+        const yesBtn = document.getElementById('yesBtn');
+        const noBtn = document.getElementById('noBtn');
+        const questionContainer = document.getElementById('questionContainer');
+        const successContainer = document.getElementById('successContainer');
+        const sadContainer = document.getElementById('sadContainer');
+
+        yesBtn.addEventListener('click', () => {
+            questionContainer.classList.add('hidden');
+            successContainer.classList.remove('hidden');
+            launchConfetti();
+        });
+
+        noBtn.addEventListener('click', () => {
+            noClickCount++;
+            
+            if (noClickCount >= 3) {
+                questionContainer.classList.add('hidden');
+                sadContainer.classList.remove('hidden');
+                return;
+            }
+
+            // Make Yes button bigger
+            yesSize += 0.5;
+            yesBtn.style.transform = `scale(${yesSize})`;
+
+            // Make No button smaller
+            noSize -= 0.25;
+            noBtn.style.transform = `scale(${noSize})`;
+
+            // Move No button to random position
+            moveNoButton();
+        });
+
+        function moveNoButton() {
+            // Add the moving class to make it absolutely positioned
+            noBtn.classList.add('moving');
+            
+            const container = document.querySelector('.button-container');
+            const containerRect = container.getBoundingClientRect();
+            
+            const maxX = containerRect.width - noBtn.offsetWidth;
+            const maxY = containerRect.height - noBtn.offsetHeight;
+            
+            const randomX = Math.random() * maxX;
+            const randomY = Math.random() * maxY;
+            
+            noBtn.style.left = randomX + 'px';
+            noBtn.style.top = randomY + 'px';
+        }
+
+        // Confetti animation
+        function launchConfetti() {
+            const canvas = document.getElementById('confetti');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const confettiPieces = [];
+            const confettiCount = 200;
+            const colors = ['#ff6b6b', '#ee5a6f', '#f06595', '#cc5de8', '#845ef7', '#5c7cfa', '#339af0', '#22b8cf', '#20c997', '#51cf66', '#94d82d', '#ffd43b', '#ffa94d', '#ff6b6b'];
+
+            class ConfettiPiece {
+                constructor() {
+                    this.x = Math.random() * canvas.width;
+                    this.y = Math.random() * canvas.height - canvas.height;
+                    this.size = Math.random() * 10 + 5;
+                    this.speedY = Math.random() * 3 + 2;
+                    this.speedX = Math.random() * 2 - 1;
+                    this.color = colors[Math.floor(Math.random() * colors.length)];
+                    this.rotation = Math.random() * 360;
+                    this.rotationSpeed = Math.random() * 10 - 5;
+                }
+
+                update() {
+                    this.y += this.speedY;
+                    this.x += this.speedX;
+                    this.rotation += this.rotationSpeed;
+
+                    if (this.y > canvas.height) {
+                        this.y = -10;
+                        this.x = Math.random() * canvas.width;
+                    }
+                }
+
+                draw() {
+                    ctx.save();
+                    ctx.translate(this.x, this.y);
+                    ctx.rotate(this.rotation * Math.PI / 180);
+                    ctx.fillStyle = this.color;
+                    ctx.fillRect(-this.size / 2, -this.size / 2, this.size, this.size);
+                    ctx.restore();
+                }
+            }
+
+            for (let i = 0; i < confettiCount; i++) {
+                confettiPieces.push(new ConfettiPiece());
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                confettiPieces.forEach(piece => {
+                    piece.update();
+                    piece.draw();
+                });
+
+                requestAnimationFrame(animate);
+            }
+
+            animate();
+
+            // Stop confetti after 5 seconds
+            setTimeout(() => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
